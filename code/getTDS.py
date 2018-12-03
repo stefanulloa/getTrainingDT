@@ -1,0 +1,58 @@
+
+import os
+import os.path as path
+import zipfile
+
+currentDir = os.getcwd()
+
+print(currentDir)
+#create the data folder that will hold all the data files
+dataFolder = path.join(path.abspath(path.join(currentDir,'..')), 'data\\dataFolder')
+if not os.path.exists(dataFolder):
+    os.makedirs(dataFolder)
+
+#get 'data' path
+currentDirLevelUp = path.abspath(path.join(currentDir,".."))
+for files in os.listdir(currentDirLevelUp):
+    if files == 'data':
+        dataDir = path.join(currentDirLevelUp,files)
+
+zipFilesDir = []
+
+#get list of zip files paths
+for file in os.listdir(dataDir):
+    if file == 'AFEW_VA':
+        subDataDir = path.join(dataDir,file)
+        for root, directories, files in os.walk(subDataDir):
+            for sub_files in files:
+                zipFilesDir.append(path.join(subDataDir,sub_files))
+
+print(zipFilesDir)
+
+#folders for images, valence-arousal and landmarks
+for zipFiles in zipFilesDir:
+    topID = os.path.splitext(os.path.basename(zipFiles))[0] #corresponds to zip file ID
+
+    imgFolder = path.join(dataFolder, topID+'\\img')
+    if not os.path.exists(imgFolder):
+        os.makedirs(imgFolder)
+
+    lmFolder = path.join(dataFolder, topID+'\\annot')
+    if not os.path.exists(lmFolder):
+        os.makedirs(lmFolder)
+
+    vaFolder = path.join(dataFolder, topID+'\\annot2')
+    if not os.path.exists(vaFolder):
+        os.makedirs(vaFolder)
+
+print(subDataDir)
+for zipFiles in zipFilesDir:
+    topID = os.path.splitext(os.path.basename(zipFiles))[0] #corresponds to zip file ID
+    with zipfile.ZipFile(zipFiles) as zf:
+        for zip_inf in zf.infolist():
+            if zip_inf.filename.endswith('.png'):
+                videoID, frameID = os.path.split(zip_inf.filename)
+                fileRename = topID + '_' + videoID + '_' + frameID
+                finalPath = path.join(dataFolder,topID+'\\img')
+                zip_inf.filename = fileRename #this change of filename allows to get only the file with no upper structures
+                #zf.extract(zip_inf, finalPath)
