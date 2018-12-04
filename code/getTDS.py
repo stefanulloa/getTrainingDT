@@ -45,8 +45,8 @@ for zipFiles in zipFilesDir:
     vaFolder = path.join(dataFolder, topID+'\\annot2')
     if not os.path.exists(vaFolder):
         os.makedirs(vaFolder)
-'''
-#extract landmark points from json files, assign new unique ID to them so that all of them can be in the same folder
+
+#extract valence-arousal and landmark points from json files, assign new unique ID to them so that all of them can be in the same folder
 for zipFiles in zipFilesDir:
     topID = os.path.splitext(os.path.basename(zipFiles))[0] #corresponds to zip file ID
     with zipfile.ZipFile(zipFiles) as zf:
@@ -56,17 +56,33 @@ for zipFiles in zipFilesDir:
                     data = json.load(js) #data is of type dict
                     videoID = os.path.dirname(zip_inf.filename)
                     for frameKey in data['frames']:
+
+                        #valence-arousal data
+                        vaPath = dataFolder+'\\'+topID+'\\annot2\\'+topID+'_'+videoID+'_'+frameKey+'.aro'
+                        if not os.path.exists(os.path.dirname(vaPath)):
+                            os.makedirs(os.path.dirname(vaPath))
+                        arousal = data['frames'][frameKey]['arousal']
+                        valence = data['frames'][frameKey]['valence']
+
+                        ''' uncomment to get v-a data
+                        with open(vaPath,"w") as file:
+                            file.write(str(arousal) + " " + str(valence) + "\n")
+                        '''
+
+                        #landmark data
                         pointsPath = dataFolder+'\\'+topID+'\\annot\\'+topID+'_'+videoID+'_'+frameKey+'.pts'
                         if not os.path.exists(os.path.dirname(pointsPath)):
                             os.makedirs(os.path.dirname(pointsPath))
+
+                        ''' uncomment to get landmark data
                         with open(pointsPath, "w") as file:
                             pointsSize = len(data['frames'][frameKey]['landmarks'])
                             file.write('version 1\nn_points: '+str(pointsSize)+'\n{\n')
                             for x_landmark, y_landmark in data['frames'][frameKey]['landmarks']:
                                 file.write(str(x_landmark) + " " + str(y_landmark) + "\n")
                             file.write('}')
-'''
-'''
+                        '''
+
 #extract image files, assign new unique ID to them so that all of them can be in the same folder
 for zipFiles in zipFilesDir:
     topID = os.path.splitext(os.path.basename(zipFiles))[0] #corresponds to zip file ID
@@ -77,5 +93,4 @@ for zipFiles in zipFilesDir:
                 fileRename = topID + '_' + videoID + '_' + frameID
                 finalPath = path.join(dataFolder,topID+'\\img')
                 zip_inf.filename = fileRename #this change of filename allows to get only the file with no upper structures
-                zf.extract(zip_inf, finalPath) #uncomment to process file transfer'''
-'''
+                #zf.extract(zip_inf, finalPath) #uncomment to process file transfer
